@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: jobboard
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: 4327766
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./job-board-backend
+
+    - name: Run backend tests
+      run: npm test
+      working-directory: ./job-board-backend
+
+    - name: Install frontend dependencies
+      run: npm install
+      working-directory: ./job-board-frontend
+
+    - name: Run frontend tests
+      run: npm test
+      working-directory: ./job-board-frontend
